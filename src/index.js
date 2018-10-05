@@ -8,10 +8,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const enterGameBtn = document.querySelector("#enter-game-btn");
   const playerForm = document.querySelector("#player-name-form");
   const rulesImg = document.querySelector("#rules-img");
-  const winnerSpan = document.querySelector("#winner-span");
 
   const bombSound = new Audio("sounds/bomb.mp3");
   const pikaSound = new Audio("sounds/pikachu.mp3");
+  const gameSound = new Audio("sounds/game.mp3");
 
   let player1Name;
   let player2Name;
@@ -29,6 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentGrid2;
 
   enterGameBtn.addEventListener("click", (event) => {
+    gameSound.play();
     player1Name = document.querySelector("#player1-name").value;
     player2Name = document.querySelector("#player2-name").value;
     rulesImg.style.display = "block";
@@ -36,48 +37,49 @@ document.addEventListener("DOMContentLoaded", () => {
   })
 
   rulesImg.addEventListener("click", (event) => {
+    rulesImg.style.display = "none";
     background.style.display = "grid";
     backdrop.style.display = "block";
     document.body.addEventListener("keydown", eventFn);
   })
 
   let eventFn = (e) => {
+    console.log(e.keyCode);
     if (gameoverStatus === false) {
-      if (e.key === "z") {
+      if (e.keyCode === 88) {
         dropBomb(currentLocation1[0], currentLocation1[1], power1);
       }
-      if (e.key === "n") {
+      if (e.keyCode === 190) {
         dropBomb(currentLocation2[0], currentLocation2[1], power2);
       }
-      if (e.key === "i") {
+      if (e.keyCode === 38) {
         moveUp(currentLocation2, 2);
       }
-      if(e.key === "k"){
+      if(e.keyCode === 40){
         moveDown(currentLocation2, 2)
       }
-      if(e.key === "j"){
+      if(e.keyCode === 37){
         moveLeft(currentLocation2, 2)
       }
-      if(e.key === "l"){
+      if(e.keyCode === 39){
         moveRight(currentLocation2, 2)
       }
-      if (e.key === "w") {
+      if (e.keyCode === 87) {
         moveUp(currentLocation1, 1);
       }
-      if(e.key === "s"){
+      if(e.keyCode === 83){
         moveDown(currentLocation1, 1)
       }
-      if(e.key === "a"){
+      if(e.keyCode === 65){
         moveLeft(currentLocation1, 1)
       }
-      if(e.key === "d"){
+      if(e.keyCode === 68){
         moveRight(currentLocation1, 1)
       }
     }
   }
 
-  fetch("http://localhost:3000/api/v1/grids")
-  .then(response => response.json())
+  Adapter.getGrids()
   .then(gridObjs => {
     gridObjs.map(gridObj => {
       new Grid(gridObj);
@@ -108,27 +110,30 @@ document.addEventListener("DOMContentLoaded", () => {
       let currentGrid = getGridElement(currentGridId);
       let topGridId = getGridId(location[0], location[1] - 1);
       let topGrid = getGridElement(topGridId);
+
+      if (currentGrid.dataset.category === "fire") {
+        currentGrid.src = "media/burned.png";
+      } else if (currentGrid.dataset.category === "bomb") {
+          currentGrid.src = "media/bomb.png";
+      } else if (currentGrid.dataset.category === "background") {
+          currentGrid.src = "media/background.jpg";
+      } else if (currentGrid.dataset.category === `player${player}`) {
+          currentGrid.dataset.category = "background";
+          currentGrid.src = "media/background.jpg";
+      }
+
+      if (topGrid.dataset.category === "fire") {
+        topGrid.src = "media/burned.png";
+      }
+
       if (!["brick", "bomb"].includes(topGrid.dataset.category)) {
         location[1]--;
-
         topGrid.dataset.category = `player${player}`;
         topGrid.src = `media/avatar${player}.png`;
         if (topGrid.dataset.power === "true") {
           player === 1 ? power1++ : power2++
           topGrid.dataset.power = "false"
         }
-
-        if (currentGrid.dataset.category === "fire") {
-          currentGrid.src = "media/burned.png";
-        } else if (currentGrid.dataset.category === "bomb") {
-            currentGrid.src = "media/bomb.png";
-          } else if (currentGrid.dataset.category === "background") {
-            currentGrid.src = "media/background.jpg";
-          } else if (currentGrid.dataset.category === `player${player}`) {
-            currentGrid.dataset.category = "background";
-            currentGrid.src = "media/background.jpg";
-          }
-
         player === 1 ? currentGrid1 = topGrid : currentGrid2 = topGrid
       }
     }
@@ -267,18 +272,26 @@ document.addEventListener("DOMContentLoaded", () => {
         gameoverStatus = true;
         currentGrid1.src = "media/burned.png";
         currentGrid1.dataset.category = "burned";
-        winnerSpan.innerText = `${player2Name}`.toUpperCase();
-        setTimeout(showGameover, 5000)
+        winner.innerText += `${player2Name} Wins!`.toUpperCase();
+        setTimeout(showGameover, 4000)
       }
       if (currentGrid2.dataset.category === "fire" && gameoverStatus === false) {
         gameoverStatus = true;
         currentGrid2.src = "media/burned.png";
         currentGrid2.dataset.category = "burned";
-        winnerSpan.innerText = `${player1Name}`.toUpperCase();
-        setTimeout(showGameover, 5000)
+        winner.innerText += `${player1Name} Wins!`.toUpperCase();
+        setTimeout(showGameover, 4000)
       }
 
-      setTimeout(removeFire, 1800);
+      function showGameover(){
+        gameoverStatus = true;
+        pikaSound.play();
+        background.style.display = "none";
+        backdrop.style.display = "none";
+        gameover.style.display = "block";
+      }
+
+      setTimeout(removeFire, 800);
 
     function removeFire() {
       currentGridId1 = getGridId(currentLocation1[0], currentLocation1[1]);
@@ -298,15 +311,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       })
     }
+   }
   }
 
-    function showGameover(){
-      gameoverStatus = true;
-      pikaSound.play();
-      gameover.style.display = "block";
-      winner.style.display = "block";
-      background.style.display = "none";
-    }
-  }
+// Restart the game
+  gameover.addEventListener("click", e => {
+    window.location.href = "index.html"
+  })
 
 });
