@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css?family=Anton" rel="stylesheet">
     <script type="text/javascript" src="src/index.js"></script>
     <script type="text/javascript" src="src/grid.js"></script>
+    <script type="text/javascript" src="src/adapter.js"></script>
   </head>
   <body>
     <div id="login">
@@ -24,7 +25,15 @@
     <div id="background">
     </div>
     <img id="backdrop" src="media/backdrop.png" alt="">
-    <img id="gameover" src="media/gameover.png" alt="">
-    <div id="winner" class="blink"><span id="winner-span"></span></div>
+    <div id="gameover">
+      <img id="gameover-img" src="media/gameover.png" alt="">
+      <div class="row">
+        <div class="gameover-text col-6">
+        </div>
+      <div id="winner" class="gameover-text col-6 blink">
+         GAME OVER
+      </div>
+    </div>
+    </div>
   </body>
 </html>
