@@ -1,0 +1,5 @@
+class Adaper {
+  getGrids() {
+    return 
+  }
+}
