@@ -316,7 +316,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Restart the game
   gameover.addEventListener("click", e => {
-    window.location.href = "index.html"
+    window.location.href = "https://bomberpika.herokuapp.com/"
   })
 
 });
